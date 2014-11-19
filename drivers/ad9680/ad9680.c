@@ -1,6 +1,6 @@
 /***************************************************************************//**
-* @file jesd204b_v51.c
-* @brief Implementation of JESD204B V51 Driver.
+* @file ad9680.c
+* @brief Implementation of AD9680 Driver.
 * @author DBogdan (dragos.bogdan@analog.com)
 ********************************************************************************
 * Copyright 2014(c) Analog Devices, Inc.
@@ -40,57 +40,90 @@
 /******************************************************************************/
 /***************************** Include Files **********************************/
 /******************************************************************************/
+#include <stdint.h>
 #include <xil_printf.h>
-#include <xil_io.h>
-#include "jesd204b_v51.h"
+#include "platform_drivers.h"
+#include "ad9680.h"
 
 /******************************************************************************/
 /************************ Variables Definitions *******************************/
 /******************************************************************************/
-uint32_t jesd204b_baseaddr;
+uint8_t ad9680_slave_select;
 
 /***************************************************************************//**
-* @brief jesd204b_read
+* @brief ad9680_spi_read
 *******************************************************************************/
-int32_t jesd204b_read(uint32_t reg_addr, uint32_t *reg_data)
+int32_t ad9680_spi_read(uint16_t reg_addr, uint8_t *reg_data)
 {
-	*reg_data = Xil_In32((jesd204b_baseaddr + reg_addr));
+	uint8_t buf[3];
+	int32_t ret;
 
-	return 0;
+	buf[0] = 0x80 | (reg_addr >> 8);
+	buf[1] = reg_addr & 0xFF;
+	buf[2] = 0x00;
+
+	ret = spi_write_and_read(ad9680_slave_select, buf, 3);
+	*reg_data = buf[2];
+
+	return ret;
 }
 
 /***************************************************************************//**
-* @brief jesd204b_write
+* @brief ad9680_spi_write
 *******************************************************************************/
-int32_t jesd204b_write(uint32_t reg_addr, uint32_t reg_data)
+int32_t ad9680_spi_write(uint16_t reg_addr, uint8_t reg_data)
 {
-	Xil_Out32((jesd204b_baseaddr + reg_addr), reg_data);
+	uint8_t buf[3];
+	int32_t ret;
 
-	return 0;
+	buf[0] = reg_addr >> 8;
+	buf[1] = reg_addr & 0xFF;
+	buf[2] = reg_data;
+
+	ret = spi_write_and_read(ad9680_slave_select, buf, 3);
+
+	return ret;
 }
 
 /***************************************************************************//**
-* @brief jesd204b_setup
+* @brief ad9680_setup
 *******************************************************************************/
-int32_t jesd204b_setup(uint32_t baseaddr, jesd204b_state setup_param)
+int32_t ad9680_setup(uint32_t spi_device_id, uint8_t slave_select)
 {
-	jesd204b_baseaddr = baseaddr;
-	jesd204b_write(JESD204B_REG_RESET, JESD204B_RESET);
-	jesd204b_write(JESD204B_REG_ILA_CTRL,
-			setup_param.lanesync_enable ? JESD204B_ILA_EN : 0);
-	jesd204b_write(JESD204B_REG_SCR_CTRL,
-			setup_param.scramble_enable ? JESD204B_SCR_EN : 0);
-	jesd204b_write(JESD204B_REG_SYSREF_CTRL,
-			setup_param.sysref_always_enable ? JESD204B_ALWAYS_SYSREF_EN : 0);
-	jesd204b_write(JESD204B_REG_ILA_MFC,
-			JESD204B_ILA_MFC(setup_param.frames_per_multiframe));
-	jesd204b_write(JESD204B_REG_OCTETS_PER_FRAME,
-			JESD204B_OCTETS_PER_FRAME(setup_param.bytes_per_frame));
-	jesd204b_write(JESD204B_REG_FRAMES_PER_MFRAME,
-			JESD204B_FRAMES_PER_MFRAME(setup_param.frames_per_multiframe));
-	jesd204b_write(JESD204B_REG_SUBCLASS, setup_param.subclass);
+	uint8_t chip_id;
+	uint8_t pll_stat;
 
-	xil_printf("JESD204B successfully initialized.\n");
+	ad9680_slave_select = slave_select;
+	spi_init(spi_device_id, 1, 1);
+
+	ad9680_spi_write(AD9680_REG_INTERFACE_CONF_A, 0x81);	// RESET
+	mdelay(5);
+	ad9680_spi_write(AD9680_REG_INTERFACE_CONF_B, 0x01);	// RESET
+	mdelay(1);
+
+	ad9680_spi_write(AD9680_REG_DEVICE_INDEX, 0x03);	// select both channels
+	ad9680_spi_write(AD9680_REG_CHIP_DEC_RATIO, 0x00);	// full sample rate (decimation = 1)
+	ad9680_spi_write(AD9680_REG_ADC_TEST_MODE, 0x04);	// test pattern
+	ad9680_spi_write(AD9680_REG_OUTPUT_MODE, 0x00);	// offset binary
+	ad9680_spi_write(AD9680_REG_JESD204B_QUICK_CONFIG, 0x88);	// m=2, l=4, f= 1
+	ad9680_spi_write(AD9680_REG_JESD204B_CSN_CONFIG, 0x0d);	// 14-bit
+	ad9680_spi_write(AD9680_REG_JESD204B_LANE_SERD_OUT0_ASSIGN, 0x00);	// serdes-0 = lane 0
+	ad9680_spi_write(AD9680_REG_JESD204B_LANE_SERD_OUT1_ASSIGN, 0x11);	// serdes-1 = lane 1
+	ad9680_spi_write(AD9680_REG_JESD204B_LANE_SERD_OUT2_ASSIGN, 0x22);	// serdes-2 = lane 2
+	ad9680_spi_write(AD9680_REG_JESD204B_LANE_SERD_OUT3_ASSIGN, 0x33);	// serdes-3 = lane 3
+	mdelay(20);
+
+	ad9680_spi_read(AD9680_REG_CHIP_ID_LOW, &chip_id);
+	if(chip_id != AD9680_CHIP_ID)
+	{
+		xil_printf("Error: Invalid CHIP ID (0x%x).\n", chip_id);
+		return -1;
+	}
+
+	ad9680_spi_read(AD9680_REG_JESD204B_PLL_LOCK_STATUS, &pll_stat);
+	xil_printf("AD9680 PLL is %s.\n", pll_stat & 0x80 ? "locked" : "unlocked");
+
+	xil_printf("AD9680 successfully initialized.\n");
 
 	return 0;
 }
