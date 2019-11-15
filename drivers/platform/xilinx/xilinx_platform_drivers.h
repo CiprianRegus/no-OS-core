@@ -49,6 +49,7 @@
 #include <xspips.h>
 #include <xgpiops.h>
 #include <xil_exception.h>
+#include "spi_extra.h"
 #else
 #include <xspi.h>
 #include <xgpio.h>
@@ -57,12 +58,6 @@
 #ifdef XIIC_H
 #include <xiic.h>
 #endif
-
-/******************************************************************************/
-/********************** Macros and Constants Definitions **********************/
-/******************************************************************************/
-
-#define SPI_CS_DECODE	0x01
 
 /******************************************************************************/
 /*************************** Types Declarations *******************************/
@@ -86,28 +81,6 @@ typedef struct xil_i2c_desc {
 #else
 #endif
 } xil_i2c_desc;
-
-typedef enum spi_type {
-	XILINX_SPI
-} spi_type;
-
-typedef struct xil_spi_init_param {
-	enum spi_type	type;
-	uint32_t	id;
-	uint32_t	flags;
-} xil_spi_init_param;
-
-typedef struct xil_spi_desc {
-	enum spi_type	type;
-	uint32_t		id;
-	uint32_t		flags;
-#ifdef _XPARAMETERS_PS_H_
-	XSpiPs_Config	*config;
-	XSpiPs			instance;
-#else
-	XSpi			instance;
-#endif
-} xil_spi_desc;
 
 typedef enum gpio_type {
 	XILINX_GPIO
