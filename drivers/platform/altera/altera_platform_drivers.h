@@ -44,24 +44,6 @@
 /*************************** Types Declarations *******************************/
 /******************************************************************************/
 
-typedef enum i2c_type {
-	ALTERA_I2C
-} i2c_type;
-
-typedef struct altera_i2c_init_param {
-	enum i2c_type	type;
-	uint32_t	id;
-} altera_i2c_init_param;
-
-typedef struct altera_i2c_desc {
-	enum i2c_type	type;
-	uint32_t	id;
-} altera_i2c_desc;
-
-typedef enum spi_type {
-	ALTERA_SPI
-} spi_type;
-
 typedef enum gpio_type {
 	ALTERA_GPIO
 } gpio_type;
