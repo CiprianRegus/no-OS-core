@@ -44,9 +44,6 @@
 #include "ad9144.h"
 
 /** IIO Descriptor */
-struct iio_device ad9144_iio_descriptor = {
-	.debug_reg_read = (int32_t (*)())ad9144_spi_read,
-	.debug_reg_write = (int32_t (*)())ad9144_spi_write,
-};
+extern struct iio_device const ad9144_iio_descriptor;
 
 #endif //IIO_AD9144_H
