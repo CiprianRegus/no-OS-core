@@ -44,9 +44,6 @@
 #include "ad9680.h"
 
 /** IIO Descriptor */
-struct iio_device ad9680_iio_descriptor = {
-	.debug_reg_read = (int32_t (*)())ad9680_spi_read,
-	.debug_reg_write = (int32_t (*)())ad9680_spi_write,
-};
+extern struct iio_device const ad9680_iio_descriptor;
 
 #endif //IIO_AD9680_H
