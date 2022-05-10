@@ -41,8 +41,9 @@
 #define IIO_ADXRS290_H
 
 #include "iio_types.h"
-
+#include "iio_trigger.h"
 
 extern struct iio_device adxrs290_iio_descriptor;
+extern struct iio_trigger adxrs290_iio_trig_desc;
 
 #endif
