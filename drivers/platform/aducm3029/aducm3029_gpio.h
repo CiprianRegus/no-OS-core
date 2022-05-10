@@ -39,6 +39,12 @@
 #ifndef ADUCM3029_GPIO_H_
 #define ADUCM3029_GPIO_H_
 
+
+/** Get GPIO pin from GPIO number */
+#define PIN(nb)		(1u << ((nb) & 0x0F))
+/** Get GPIO port from GPIO number */
+#define PORT(nb)	(((nb) & 0xF0) >> 4)
+
 /**
  * @brief ADuCM3029 specific GPIO platform ops structure
  */
