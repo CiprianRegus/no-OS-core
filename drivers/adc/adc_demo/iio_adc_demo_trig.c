@@ -58,13 +58,15 @@ static struct iio_attribute trig_attr[] = {
 	END_ATTRIBUTES_ARRAY
 };
 
-struct iio_trigger adc_iio_trig_desc = {
+struct iio_trigger adc_iio_sw_trig_desc = {
 	.is_synchronous = true,
 	.attributes = trig_attr,
 };
 
+#ifndef LINUX_PLATFORM
 struct iio_trigger adc_iio_timer_trig_desc = {
 	.is_synchronous = true,
 	.enable = iio_trig_enable,
 	.disable = iio_trig_disable,
 };
+#endif
