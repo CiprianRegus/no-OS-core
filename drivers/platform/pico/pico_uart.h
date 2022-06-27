@@ -44,6 +44,7 @@
 /******************************************************************************/
 
 #include "no_os_uart.h"
+#include "no_os_irq.h"
 #include "hardware/uart.h"
 
 /******************************************************************************/
@@ -57,6 +58,10 @@
 struct pico_uart_desc {
 	/** UART instance */
 	uart_inst_t *uart_instance;
+	/** Controller that handles UART interrupts */
+	struct no_os_irq_ctrl_desc *nvic;
+	/** RX complete callback */
+	struct no_os_callback_desc rx_callback;
 };
 
 /**
