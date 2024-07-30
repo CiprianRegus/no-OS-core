@@ -1,6 +1,6 @@
 /***************************************************************************//**
- *   @file   iio_ad400x.h
- *   @brief  Header file for AD400X IIO interface
+ *   @file   iio_pulsar_adc.h
+ *   @brief  Header file for PULSAR_ADC IIO interface
  *   @author Axel Haslam (ahaslam@baylibre.com)
 ********************************************************************************
  * Copyright 2024(c) Analog Devices, Inc.
@@ -37,8 +37,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#ifndef _AD400X_IIO_H_
-#define _AD400X_IIO_H_
+#ifndef _PULSAR_ADC_IIO_H_
+#define _PULSAR_ADC_IIO_H_
 
 /******************************************************************************/
 /***************************** Include Files **********************************/
@@ -47,18 +47,18 @@
 
 #include "iio.h"
 #include "iio_types.h"
-#include "ad400x.h"
+#include "pulsar_adc.h"
 
 /******************************************************************************/
 /********************** Public/Extern Declarations ****************************/
 /******************************************************************************/
 /**
- * @struct ad400x_iio_dev
- * @brief AD400x IIO device structure
+ * @struct pulsar_adc_iio_dev
+ * @brief pulsar_adc IIO device structure
  */
-struct ad400x_iio_dev {
-	/** AD400x driver handler */
-	struct ad400x_dev *ad400x_dev;
+struct pulsar_adc_iio_dev {
+	/** pulsar_adc driver handler */
+	struct pulsar_adc_dev *pulsar_adc_dev;
 	/** Generic IIO device handler */
 	struct iio_device *iio_dev;
 	/* Voltage reference */
@@ -68,18 +68,18 @@ struct ad400x_iio_dev {
 };
 
 /**
- * @struct ad400x_iio_init_param
- * @brief AD400x IIO initialization structure
+ * @struct pulsar_adc_iio_init_param
+ * @brief pulsar_adc IIO initialization structure
  */
-struct ad400x_iio_init_param {
-	struct ad400x_init_param *init_param;
+struct pulsar_adc_iio_init_param {
+	struct pulsar_adc_init_param *init_param;
 	/* Voltage reference */
 	uint32_t ref_voltage_mv;
 };
 
-/** Allocate memory for AD400x IIO handler. */
-int ad400x_iio_init(struct ad400x_iio_dev **dev,
-		    struct ad400x_iio_init_param *iio_init_param);
-/** Free memory allocated by iio_ad400x_init(). */
-int ad400x_iio_remove(struct ad400x_iio_dev *dev);
-#endif /* __AD400X_IIO_H__ */
+/** Allocate memory for pulsar_adc IIO handler. */
+int pulsar_adc_iio_init(struct pulsar_adc_iio_dev **dev,
+			struct pulsar_adc_iio_init_param *iio_init_param);
+/** Free memory allocated by iio_pulsar_adc_init(). */
+int pulsar_adc_iio_remove(struct pulsar_adc_iio_dev *dev);
+#endif /* __PULSAR_ADC_IIO_H__ */
